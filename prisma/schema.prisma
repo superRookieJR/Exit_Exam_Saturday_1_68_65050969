@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Semester {
+  S1
+  S2
+}
+
+enum Grade {
+  A
+  B_PLUS
+  B
+  C_PLUS
+  C
+  D_PLUS
+  D
+  F
+}
+
+model Students {
+  id                 String              @id
+  prefix             String
+  fname              String
+  lname              String
+  birth_date         DateTime
+  current_school     String
+  email              String              @unique
+  registeredSubjects RegisteredSubject[]
+}
+
+model Subjects {
+  id      String  @id
+  name    String
+  credit  Int
+  teacher String?
+
+  // self-referencing prerequisite (already named)
+  requiredBeforeId String?
+  requiredBefore   Subjects?  @relation("Prerequisite", fields: [requiredBeforeId], references: [id])
+  dependents       Subjects[] @relation("Prerequisite")
+
+  // backref from RegisteredSubject
+  registrations     RegisteredSubject[]
+  subjectStructures SubjectStructure[]  @relation("SubjectStructureRequired")
+}
+
+model SubjectStructure {
+  id            String   @id
+  course_name   String
+  major_name    String
+  open_semester Semester
+
+  required_subject_id String?
+  required_subject    Subjects? @relation("SubjectStructureRequired", fields: [required_subject_id], references: [id])
+}
+
+model RegisteredSubject {
+  id           Int      @id @default(autoincrement())
+  studentId    String
+  subjectId    String
+  semester     Semester
+  academicYear Int
+  grade        Grade?
+
+  student Students @relation(fields: [studentId], references: [id])
+  subject Subjects @relation(fields: [subjectId], references: [id])
+
+  @@unique([studentId, subjectId, academicYear, semester])
+}
