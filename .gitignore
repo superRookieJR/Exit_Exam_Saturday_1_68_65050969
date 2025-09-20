@@ -41,3 +41,16 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# SQLite (local dev DB)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Prisma local SQLite path(s)
+prisma/*.db
+prisma/dev.db
